@@ -31,4 +31,15 @@ public class BoardTests
         // Assert
         Assert.Equal(piece, board[0, 0]);
     }
+
+    [Fact]
+    public void FromFen_StartingPosition_PlacesKingsAndQueens()
+    {
+        // Act
+        var board = Board.FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+        // Assert
+        Assert.Equal(new Piece(PieceType.King, PieceColor.White), board[0, 4]);
+        Assert.Equal(new Piece(PieceType.Queen, PieceColor.Black), board[7, 3]);
+    }
 }
