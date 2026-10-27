@@ -1,8 +1,3 @@
 ﻿namespace Chess.Engine;
 
-
-
-public readonly record struct Move(Square From, Square To);
-
-
-
+public readonly record struct Move(Square From, Square To, PieceType? Promotion = null);
