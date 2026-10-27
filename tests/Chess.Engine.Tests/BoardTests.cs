@@ -42,4 +42,14 @@ public class BoardTests
         Assert.Equal(new Piece(PieceType.King, PieceColor.White), board[0, 4]);
         Assert.Equal(new Piece(PieceType.Queen, PieceColor.Black), board[7, 3]);
     }
+
+    [Theory]
+    [InlineData(Board.StartingFen, PieceColor.White)]
+    [InlineData("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", PieceColor.Black)]
+    public void FromFen_ReadsSideToMove(string fen, PieceColor expected)
+    {
+        var board = Board.FromFen(fen);
+
+        Assert.Equal(expected, board.SideToMove);
+    }
 }

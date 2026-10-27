@@ -32,10 +32,16 @@ public class Board
         set => _squares[rank, file] = value;
     }
 
+    public PieceColor SideToMove { get; private set; }
+
+
     public static Board FromFen(string fen)
     {
         Board board = new Board();
-        string first = fen.Split(' ')[0];
+        string[] parts = fen.Split(' ');
+
+        string first = parts[0];
+        
         int rank = 7;
         int file = 0;
 
@@ -58,6 +64,9 @@ public class Board
                 file++;
             }
         }
+
+        board.SideToMove = parts[1] == "w" ? PieceColor.White : PieceColor.Black;
+
         return board;
     }
 
