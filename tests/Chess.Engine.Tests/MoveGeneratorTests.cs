@@ -16,4 +16,18 @@ public class MoveGeneratorTests
         Assert.Contains(new Move(startingSquare, new Square(2, 2)), moves);
     }
 
+    [Fact]
+    public void GetRookMoves_BlockedAndCapture_ReturnsTenMoves()
+    {
+        
+        var board = Board.FromFen("8/8/3P4/8/3R2p1/8/8/8 w - - 0 1");
+        Square startingSquare = new Square(3, 3);
+        var moves = MoveGenerator.GetRookMoves(board, startingSquare);
+
+        Assert.Equal(10, moves.Count);
+        Assert.Contains(new Move(startingSquare, new Square(3, 6)), moves);
+        Assert.DoesNotContain(new Move(startingSquare, new Square(5, 3)), moves);
+        Assert.DoesNotContain(new Move(startingSquare, new Square(3, 7)), moves);
+    }
+
 }
