@@ -4,6 +4,7 @@ namespace Chess.Engine;
 public class Board
 {
     private readonly Piece?[,] _squares = new Piece?[8, 8];
+
     private static Piece PieceFromChar(char c)
     {
 
@@ -23,6 +24,7 @@ public class Board
         return new Piece(type, color); 
     }
 
+    public const string StartingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     public Piece? this[int rank, int file]
     {
@@ -58,6 +60,13 @@ public class Board
         }
         return board;
     }
+
+    public Piece? this[Square square]
+    {
+        get => this[square.Rank, square.File];
+        set => this[square.Rank, square.File] = value;
+    }
+
 
 }
 
