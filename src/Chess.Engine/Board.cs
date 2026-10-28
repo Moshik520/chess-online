@@ -76,6 +76,24 @@ public class Board
         set => this[square.Rank, square.File] = value;
     }
 
+    public void MakeMove(Move move)
+    {
+
+
+        Piece piece = this[move.From] ?? throw new ArgumentException($"No piece on {move.From}", nameof(move));
+
+
+        this[move.To] = move.Promotion is not null
+            ? new Piece(move.Promotion.Value, piece.Color)
+            : piece;
+        this[move.From] = null;
+
+
+        SideToMove = SideToMove == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
+    }
+
+
 
 }
 
