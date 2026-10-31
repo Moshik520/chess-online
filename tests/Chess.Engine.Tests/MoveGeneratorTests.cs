@@ -151,6 +151,18 @@ public class MoveGeneratorTests
         Assert.True(MoveGenerator.IsInCheck(board, PieceColor.Black));
     }
 
+    [Theory]
+    [InlineData(Board.StartingFen, GameStatus.InProgress)]
+    [InlineData("4r3/8/8/8/8/8/3P4/4K3 w - - 0 1", GameStatus.InProgress)] // in check, but the king can escape
+    [InlineData("R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1", GameStatus.Checkmate)]
+    [InlineData("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1", GameStatus.Stalemate)]
+    public void GetGameStatus_ReturnsExpectedStatus(string fen, GameStatus expected)
+    {
+        var board = Board.FromFen(fen);
+
+        Assert.Equal(expected, MoveGenerator.GetGameStatus(board));
+    }
+
     [Fact]
     public void GetPawnMoves_WhiteOnStartRank_CanAdvanceOneOrTwo()
     {
@@ -211,6 +223,41 @@ public class MoveGeneratorTests
 
         Assert.Contains(new Move(from, new Square(2, 3)), moves);
         Assert.DoesNotContain(new Move(from, new Square(2, 5)), moves);
+    }
+
+    [Fact]
+    public void GetPawnMoves_EnPassantSquare_CanCaptureOntoIt()
+    {
+        var board = Board.FromFen("4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1");
+        var e5 = new Square(4, 4);
+
+        var moves = MoveGenerator.GetPawnMoves(board, e5);
+
+        Assert.Contains(new Move(e5, new Square(5, 3)), moves);
+    }
+
+    [Fact]
+    public void GetPawnMoves_NoEnPassantSquare_CannotCaptureDiagonallyOntoEmptySquare()
+    {
+        // Same position, but the black pawn reached d5 earlier, so the chance has passed.
+        var board = Board.FromFen("4k3/8/8/3pP3/8/8/8/4K3 w - - 0 1");
+        var e5 = new Square(4, 4);
+
+        var moves = MoveGenerator.GetPawnMoves(board, e5);
+
+        Assert.DoesNotContain(new Move(e5, new Square(5, 3)), moves);
+    }
+
+    [Fact]
+    public void GetLegalMoves_EnPassantExposingKing_IsNotAllowed()
+    {
+        // Both pawns leave the 5th rank at once, which would open it for the black rook.
+        var board = Board.FromFen("8/8/8/K2pP2r/8/8/8/4k3 w - d6 0 1");
+        var e5 = new Square(4, 4);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.DoesNotContain(new Move(e5, new Square(5, 3)), moves);
     }
 
     [Fact]

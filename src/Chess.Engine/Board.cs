@@ -68,8 +68,17 @@ public class Board
         }
 
         board.SideToMove = parts[1] == "w" ? PieceColor.White : PieceColor.Black;
+        board.EnPassantSquare = parts[3] != "-" ? ParseSquare(parts[3]) : null;
+
 
         return board;
+    }
+
+    private static Square ParseSquare(string text)
+    {
+        int file = text[0] - 'a';
+        int rank = text[1] - '1';
+        return new Square(rank, file);
     }
 
     public Piece? this[Square square]
@@ -78,22 +87,35 @@ public class Board
         set => this[square.Rank, square.File] = value;
     }
 
+    public Square? EnPassantSquare { get; private set; }
+
+
     public void MakeMove(Move move)
     {
-
-
         Piece piece = this[move.From] ?? throw new ArgumentException($"No piece on {move.From}", nameof(move));
-
 
         this[move.To] = move.Promotion is not null
             ? new Piece(move.Promotion.Value, piece.Color)
             : piece;
         this[move.From] = null;
 
+        // The pawn taken en passant sits beside the destination: on the mover's rank, in the destination's file.
+        bool isEnPassantCapture = piece.Type == PieceType.Pawn && move.To == EnPassantSquare;
+        if (isEnPassantCapture)
+        {
+            this[move.From.Rank, move.To.File] = null;
+        }
+
+        bool isDoublePawnPush = piece.Type == PieceType.Pawn
+            && Math.Abs(move.To.Rank - move.From.Rank) == 2;
+
+        EnPassantSquare = isDoublePawnPush
+            ? new Square((move.From.Rank + move.To.Rank) / 2, move.From.File)
+            : null;
 
         SideToMove = SideToMove == PieceColor.White ? PieceColor.Black : PieceColor.White;
-
     }
+
 
 
     public Board Clone()
@@ -111,6 +133,7 @@ public class Board
             }
         }
         copyBoard.SideToMove = SideToMove;
+        copyBoard.EnPassantSquare = EnPassantSquare;
 
         return copyBoard;
 

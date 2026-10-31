@@ -54,6 +54,22 @@ public class BoardTests
     }
 
     [Fact]
+    public void FromFen_ReadsEnPassantSquare()
+    {
+        var board = Board.FromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+
+        Assert.Equal(new Square(2, 4), board.EnPassantSquare);
+    }
+
+    [Fact]
+    public void FromFen_NoEnPassantSquare_IsNull()
+    {
+        var board = Board.FromFen(Board.StartingFen);
+
+        Assert.Null(board.EnPassantSquare);
+    }
+
+    [Fact]
     public void Clone_MoveOnCopy_DoesNotChangeOriginal()
     {
         // Arrange
@@ -86,6 +102,52 @@ public class BoardTests
         Assert.Equal(new Piece(PieceType.Pawn, PieceColor.White), board[e4]);
         Assert.Null(board[e2]);
         Assert.Equal(PieceColor.Black, board.SideToMove);
+    }
+
+    [Theory]
+    [InlineData("4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1", 1, 3, 2)] // white e2-e4 skips e3
+    [InlineData("4k3/4p3/8/8/8/8/4P3/4K3 b - - 0 1", 6, 4, 5)] // black e7-e5 skips e6
+    public void MakeMove_DoublePawnPush_SetsEnPassantSquare(string fen, int fromRank, int toRank, int skippedRank)
+    {
+        // Arrange
+        var board = Board.FromFen(fen);
+
+        // Act
+        board.MakeMove(new Move(new Square(fromRank, 4), new Square(toRank, 4)));
+
+        // Assert
+        Assert.Equal(new Square(skippedRank, 4), board.EnPassantSquare);
+    }
+
+    [Fact]
+    public void MakeMove_AfterAnyOtherMove_ClearsEnPassantSquare()
+    {
+        // Arrange
+        var board = Board.FromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+
+        // Act
+        board.MakeMove(new Move(new Square(7, 6), new Square(5, 5))); // Ng8-f6
+
+        // Assert
+        Assert.Null(board.EnPassantSquare);
+    }
+
+    [Fact]
+    public void MakeMove_EnPassant_RemovesCapturedPawn()
+    {
+        // Arrange: black just played d7-d5 next to the white pawn on e5.
+        var board = Board.FromFen("4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1");
+        var e5 = new Square(4, 4);
+        var d6 = new Square(5, 3);
+        var d5 = new Square(4, 3);
+
+        // Act
+        board.MakeMove(new Move(e5, d6));
+
+        // Assert
+        Assert.Equal(new Piece(PieceType.Pawn, PieceColor.White), board[d6]);
+        Assert.Null(board[e5]);
+        Assert.Null(board[d5]);
     }
 
     [Fact]

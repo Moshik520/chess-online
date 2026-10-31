@@ -75,7 +75,7 @@ public static class MoveGenerator
             }
 
             Piece? targetPiece = board[target];
-            if (targetPiece is not null && targetPiece.Value.Color != myColor)
+            if ((targetPiece is not null && targetPiece.Value.Color != myColor) || target == board.EnPassantSquare)
             {
                 AddPawnMove(moves, from, target);
             }
@@ -263,6 +263,23 @@ public static class MoveGenerator
             
         }
         return legalMoves;
+
+    }
+
+    public static GameStatus GetGameStatus(Board board)
+    {
+
+        if (GetLegalMoves(board).Count != 0)
+        {
+            return GameStatus.InProgress;
+         
+        }
+        if (IsInCheck(board, board.SideToMove))
+        {
+            return GameStatus.Checkmate;
+        }
+        return GameStatus.Stalemate;
+
 
     }
 
