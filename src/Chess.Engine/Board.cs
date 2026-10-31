@@ -1,4 +1,6 @@
 ﻿
+using System.Drawing;
+
 namespace Chess.Engine;
 
 public class Board
@@ -93,6 +95,26 @@ public class Board
 
     }
 
+
+    public Board Clone()
+    {
+
+        Board copyBoard = new Board();
+
+        for (int rank = 0; rank < 8; rank++)
+        {
+            for (int file = 0; file < 8; file++)
+            {
+                copyBoard._squares[rank, file] = _squares[rank, file];
+
+
+            }
+        }
+        copyBoard.SideToMove = SideToMove;
+
+        return copyBoard;
+
+    }
 
 
 }

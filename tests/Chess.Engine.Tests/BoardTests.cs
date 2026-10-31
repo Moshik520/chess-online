@@ -54,6 +54,24 @@ public class BoardTests
     }
 
     [Fact]
+    public void Clone_MoveOnCopy_DoesNotChangeOriginal()
+    {
+        // Arrange
+        var original = Board.FromFen(Board.StartingFen);
+        var copy = original.Clone();
+        var e2 = new Square(1, 4);
+        var e4 = new Square(3, 4);
+
+        // Act
+        copy.MakeMove(new Move(e2, e4));
+
+        // Assert
+        Assert.Equal(new Piece(PieceType.Pawn, PieceColor.White), original[e2]);
+        Assert.Null(original[e4]);
+        Assert.Equal(PieceColor.White, original.SideToMove);
+    }
+
+    [Fact]
     public void MakeMove_PawnPush_MovesPieceAndPassesTurn()
     {
         // Arrange
