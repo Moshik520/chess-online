@@ -74,6 +74,22 @@ public class MoveGeneratorTests
         Assert.Contains(new Move(from, new Square(1, 0)), moves);
     }
 
+    [Theory]
+    [InlineData(Board.StartingFen, PieceColor.White, false)]
+    [InlineData(Board.StartingFen, PieceColor.Black, false)]
+    [InlineData("4k3/8/8/8/8/8/8/4R2K b - - 0 1", PieceColor.Black, true)]   // rook on the open e-file
+    [InlineData("4k3/8/8/8/4p3/8/8/4R2K b - - 0 1", PieceColor.Black, false)] // own pawn blocks the rook
+    [InlineData("4k3/8/3N4/8/8/8/8/7K b - - 0 1", PieceColor.Black, true)]   // knight jumps to the king
+    [InlineData("4k3/3P4/8/8/8/8/8/7K b - - 0 1", PieceColor.Black, true)]   // pawn attacks diagonally
+    [InlineData("4k3/4P3/8/8/8/8/8/7K b - - 0 1", PieceColor.Black, false)]  // pawn straight ahead does not
+    [InlineData("4k3/8/8/8/8/8/8/4R2K b - - 0 1", PieceColor.White, false)]  // only the attacked side is in check
+    public void IsInCheck_ReturnsWhetherKingIsAttacked(string fen, PieceColor color, bool expected)
+    {
+        var board = Board.FromFen(fen);
+
+        Assert.Equal(expected, MoveGenerator.IsInCheck(board, color));
+    }
+
     [Fact]
     public void GetPawnMoves_WhiteOnStartRank_CanAdvanceOneOrTwo()
     {

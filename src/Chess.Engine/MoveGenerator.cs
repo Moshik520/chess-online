@@ -98,6 +98,25 @@ public static class MoveGenerator
         }
     }
 
+    private static Square FindKing(Board board, PieceColor color)
+    {
+        for (int rank = 0; rank < 8; rank++)
+        {
+            for (int file = 0; file < 8; file++)
+            {
+                if (board[rank, file] == new Piece(PieceType.King, color))
+
+                {
+                    return new Square(rank, file);
+                }
+            }
+        }
+
+        throw new InvalidOperationException($"No king found for color {color}");
+
+    }
+
+
     private static PieceColor ColorAt(Board board, Square from) =>
         board[from]?.Color ?? throw new ArgumentException($"No piece on {from}", nameof(from));
 
@@ -163,4 +182,54 @@ public static class MoveGenerator
 
         return moves;
     }
+
+    public static List<Move> GetMoves(Board board, Square from)
+    {
+        PieceType type = board[from]?.Type
+            ?? throw new ArgumentException($"No piece on {from}", nameof(from));
+
+        return type switch
+        {
+            PieceType.Pawn => GetPawnMoves(board, from),
+            PieceType.Knight => GetKnightMoves(board, from),
+            PieceType.Bishop => GetBishopMoves(board, from),
+            PieceType.Rook => GetRookMoves(board, from),
+            PieceType.Queen => GetQueenMoves(board, from),
+            PieceType.King => GetKingMoves(board, from),
+            _ => throw new ArgumentOutOfRangeException(nameof(from), $"Unknown piece type {type}")
+        };
+    }
+
+    public static bool IsInCheck(Board board, PieceColor color)
+    {
+        Square kingSquare = FindKing(board, color);
+        
+
+        for (int rank = 0; rank < 8; rank++)
+        {
+            for (int file = 0; file < 8; file++)
+            {
+                Piece? piece = board[rank, file];
+                if (piece is null || piece.Value.Color == color)
+                {
+                    continue;
+                }
+
+                var moves = GetMoves(board, new Square(rank, file));
+
+                if (moves.Any(move => move.To == kingSquare))
+                {
+                    return true;
+                }
+
+            }
+        }
+        return false;
+
+    }
+
+
+
+
+
 }
