@@ -91,6 +91,67 @@ public class MoveGeneratorTests
     }
 
     [Fact]
+    public void GetLegalMoves_StartingPosition_ReturnsTwentyMoves()
+    {
+        var board = Board.FromFen(Board.StartingFen);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.Equal(20, moves.Count);
+    }
+
+    [Fact]
+    public void GetLegalMoves_KingCannotStepIntoCheck()
+    {
+        // Black rook on d8 controls the whole d-file.
+        var board = Board.FromFen("3r4/8/8/8/8/8/8/4K3 w - - 0 1");
+        var e1 = new Square(0, 4);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.Equal(3, moves.Count);
+        Assert.DoesNotContain(new Move(e1, new Square(0, 3)), moves);
+        Assert.DoesNotContain(new Move(e1, new Square(1, 3)), moves);
+    }
+
+    [Fact]
+    public void GetLegalMoves_PinnedPiece_CannotMove()
+    {
+        // White bishop on e2 stands between the black rook on e8 and the white king on e1.
+        var board = Board.FromFen("4r3/8/8/8/8/8/4B3/4K3 w - - 0 1");
+        var e2 = new Square(1, 4);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.DoesNotContain(moves, move => move.From == e2);
+    }
+
+    [Fact]
+    public void GetLegalMoves_InCheck_OnlyMovesThatEscapeCheck()
+    {
+        // The pawn on d2 cannot block the e-file, so only the king can move.
+        var board = Board.FromFen("4r3/8/8/8/8/8/3P4/4K3 w - - 0 1");
+        var e1 = new Square(0, 4);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.Equal(3, moves.Count);
+        Assert.All(moves, move => Assert.Equal(e1, move.From));
+    }
+
+    [Fact]
+    public void GetLegalMoves_Checkmate_ReturnsNoMoves()
+    {
+        // Back-rank mate: the black king is trapped behind its own pawns.
+        var board = Board.FromFen("R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1");
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.Empty(moves);
+        Assert.True(MoveGenerator.IsInCheck(board, PieceColor.Black));
+    }
+
+    [Fact]
     public void GetPawnMoves_WhiteOnStartRank_CanAdvanceOneOrTwo()
     {
         var board = Board.FromFen(Board.StartingFen);

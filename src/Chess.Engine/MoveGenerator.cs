@@ -1,4 +1,6 @@
-﻿namespace Chess.Engine;
+﻿using System.Drawing;
+
+namespace Chess.Engine;
 
 public static class MoveGenerator
 {
@@ -228,8 +230,40 @@ public static class MoveGenerator
 
     }
 
+    public static List<Move> GetLegalMoves(Board board)
+    {
+        var legalMoves = new List<Move>();
+        PieceColor us = board.SideToMove;
 
+        for (int rank = 0; rank < 8; rank++)
+        {
+            for (int file = 0; file < 8; file++)
+            {
+                Piece? piece = board[rank, file];
+                if (piece is null || piece.Value.Color != us)
+                {
+                    continue;
+                }
 
+                var moves = GetMoves(board, new Square(rank, file));
 
+                foreach (var move in moves)
+                {
+                    Board copyBoard = board.Clone();
+                    copyBoard.MakeMove(move);
+
+                    if (!IsInCheck(copyBoard, us))
+                    {
+                        legalMoves.Add(move);
+                    }
+
+                }
+            }
+
+            
+        }
+        return legalMoves;
+
+    }
 
 }
