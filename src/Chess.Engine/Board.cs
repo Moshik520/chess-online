@@ -36,6 +36,8 @@ public class Board
 
     public PieceColor SideToMove { get; private set; }
 
+    public CastlingRights CastlingRights { get; private set; }
+
 
     public static Board FromFen(string fen)
     {
@@ -68,6 +70,21 @@ public class Board
         }
 
         board.SideToMove = parts[1] == "w" ? PieceColor.White : PieceColor.Black;
+        CastlingRights rights = CastlingRights.None;
+        foreach (char c in parts[2])
+        {
+            rights |= c switch
+            {
+                'K' => CastlingRights.WhiteKingside,
+                'Q' => CastlingRights.WhiteQueenside,
+                'k' => CastlingRights.BlackKingside,
+                'q' => CastlingRights.BlackQueenside,
+                '-' => CastlingRights.None,
+                _ => throw new ArgumentException($"Unknown castling right '{c}'")
+            };
+        }
+        board.CastlingRights = rights;
+
         board.EnPassantSquare = parts[3] != "-" ? ParseSquare(parts[3]) : null;
 
 
@@ -106,6 +123,29 @@ public class Board
             this[move.From.Rank, move.To.File] = null;
         }
 
+        // Castling is sent as a two-square king move; the rook jumps to the square the king passed over.
+        bool isCastling = piece.Type == PieceType.King
+            && Math.Abs(move.To.File - move.From.File) == 2;
+        if (isCastling)
+        {
+            bool isKingside = move.To.File == 6;
+            int rookFromFile = isKingside ? 7 : 0;
+            int rookToFile = isKingside ? 5 : 3;
+
+            this[move.From.Rank, rookToFile] = this[move.From.Rank, rookFromFile];
+            this[move.From.Rank, rookFromFile] = null;
+        }
+
+        if (piece.Type == PieceType.King)
+        {
+            CastlingRights &= piece.Color == PieceColor.White
+                ? ~(CastlingRights.WhiteKingside | CastlingRights.WhiteQueenside)
+                : ~(CastlingRights.BlackKingside | CastlingRights.BlackQueenside);
+        }
+
+        // Moving from a corner means the rook left; moving to a corner means it was captured.
+        CastlingRights &= ~CornerRight(move.From) & ~CornerRight(move.To);
+
         bool isDoublePawnPush = piece.Type == PieceType.Pawn
             && Math.Abs(move.To.Rank - move.From.Rank) == 2;
 
@@ -117,6 +157,15 @@ public class Board
     }
 
 
+
+    private static CastlingRights CornerRight(Square square) => (square.Rank, square.File) switch
+    {
+        (0, 0) => CastlingRights.WhiteQueenside,
+        (0, 7) => CastlingRights.WhiteKingside,
+        (7, 0) => CastlingRights.BlackQueenside,
+        (7, 7) => CastlingRights.BlackKingside,
+        _ => CastlingRights.None
+    };
 
     public Board Clone()
     {
@@ -134,6 +183,7 @@ public class Board
         }
         copyBoard.SideToMove = SideToMove;
         copyBoard.EnPassantSquare = EnPassantSquare;
+        copyBoard.CastlingRights = CastlingRights;
 
         return copyBoard;
 

@@ -53,6 +53,17 @@ public class BoardTests
         Assert.Equal(expected, board.SideToMove);
     }
 
+    [Theory]
+    [InlineData("KQkq", CastlingRights.All)]
+    [InlineData("Kq", CastlingRights.WhiteKingside | CastlingRights.BlackQueenside)]
+    [InlineData("-", CastlingRights.None)]
+    public void FromFen_ReadsCastlingRights(string field, CastlingRights expected)
+    {
+        var board = Board.FromFen($"r3k2r/8/8/8/8/8/8/R3K2R w {field} - 0 1");
+
+        Assert.Equal(expected, board.CastlingRights);
+    }
+
     [Fact]
     public void FromFen_ReadsEnPassantSquare()
     {
@@ -148,6 +159,54 @@ public class BoardTests
         Assert.Equal(new Piece(PieceType.Pawn, PieceColor.White), board[d6]);
         Assert.Null(board[e5]);
         Assert.Null(board[d5]);
+    }
+
+    [Theory]
+    [InlineData(6, 7, 5)] // kingside: e1-g1, rook h1-f1
+    [InlineData(2, 0, 3)] // queenside: e1-c1, rook a1-d1
+    public void MakeMove_Castling_MovesRookOverKing(int kingToFile, int rookFromFile, int rookToFile)
+    {
+        // Arrange
+        var board = Board.FromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        // Act
+        board.MakeMove(new Move(new Square(0, 4), new Square(0, kingToFile)));
+
+        // Assert
+        Assert.Equal(new Piece(PieceType.King, PieceColor.White), board[0, kingToFile]);
+        Assert.Equal(new Piece(PieceType.Rook, PieceColor.White), board[0, rookToFile]);
+        Assert.Null(board[0, rookFromFile]);
+        Assert.Null(board[0, 4]);
+    }
+
+    [Fact]
+    public void MakeMove_KingMoves_LosesBothRightsForThatColor()
+    {
+        var board = Board.FromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        board.MakeMove(new Move(new Square(0, 4), new Square(1, 4)));
+
+        Assert.Equal(CastlingRights.BlackKingside | CastlingRights.BlackQueenside, board.CastlingRights);
+    }
+
+    [Fact]
+    public void MakeMove_RookLeavesCorner_LosesThatSideOnly()
+    {
+        var board = Board.FromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        board.MakeMove(new Move(new Square(0, 7), new Square(3, 7))); // Rh1-h4
+
+        Assert.Equal(CastlingRights.All & ~CastlingRights.WhiteKingside, board.CastlingRights);
+    }
+
+    [Fact]
+    public void MakeMove_RookCapturedInCorner_LosesThatSide()
+    {
+        var board = Board.FromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        board.MakeMove(new Move(new Square(0, 0), new Square(7, 0))); // Ra1xa8
+
+        Assert.Equal(CastlingRights.WhiteKingside | CastlingRights.BlackKingside, board.CastlingRights);
     }
 
     [Fact]

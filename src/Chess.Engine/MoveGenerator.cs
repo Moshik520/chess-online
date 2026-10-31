@@ -202,32 +202,84 @@ public static class MoveGenerator
         };
     }
 
-    public static bool IsInCheck(Board board, PieceColor color)
-    {
-        Square kingSquare = FindKing(board, color);
-        
+    public static bool IsInCheck(Board board, PieceColor color) =>
+        IsSquareAttacked(board, FindKing(board, color), Opponent(color));
 
+    public static bool IsSquareAttacked(Board board, Square square, PieceColor byColor)
+    {
         for (int rank = 0; rank < 8; rank++)
         {
             for (int file = 0; file < 8; file++)
             {
                 Piece? piece = board[rank, file];
-                if (piece is null || piece.Value.Color == color)
+                if (piece is null || piece.Value.Color != byColor)
                 {
+                    continue;
+                }
+
+                // A pawn attacks diagonally even when the square is empty, and its forward
+                // push never attacks, so its move list cannot answer this question.
+                if (piece.Value.Type == PieceType.Pawn)
+                {
+                    int forward = byColor == PieceColor.White ? 1 : -1;
+                    if (square.Rank == rank + forward && Math.Abs(square.File - file) == 1)
+                    {
+                        return true;
+                    }
+
                     continue;
                 }
 
                 var moves = GetMoves(board, new Square(rank, file));
 
-                if (moves.Any(move => move.To == kingSquare))
+                if (moves.Any(move => move.To == square))
                 {
                     return true;
                 }
-
             }
         }
-        return false;
 
+        return false;
+    }
+
+    private static PieceColor Opponent(PieceColor color) =>
+        color == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
+    // Castling is generated here and not in GetKingMoves: it needs attack checks, and
+    // IsSquareAttacked calls GetKingMoves, so putting it there would recurse forever.
+    private static void AddCastlingMoves(Board board, List<Move> moves, PieceColor us)
+    {
+        int rank = us == PieceColor.White ? 0 : 7;
+        var kingSquare = new Square(rank, 4);
+        var king = new Piece(PieceType.King, us);
+        var rook = new Piece(PieceType.Rook, us);
+        PieceColor them = Opponent(us);
+
+        if (board[kingSquare] != king || IsSquareAttacked(board, kingSquare, them))
+        {
+            return;
+        }
+
+        CastlingRights kingside = us == PieceColor.White ? CastlingRights.WhiteKingside : CastlingRights.BlackKingside;
+        if (board.CastlingRights.HasFlag(kingside)
+            && board[rank, 7] == rook
+            && board[rank, 5] is null && board[rank, 6] is null
+            && !IsSquareAttacked(board, new Square(rank, 5), them)
+            && !IsSquareAttacked(board, new Square(rank, 6), them))
+        {
+            moves.Add(new Move(kingSquare, new Square(rank, 6)));
+        }
+
+        // On the queenside the rook also passes b1/b8, so it must be empty but may be attacked.
+        CastlingRights queenside = us == PieceColor.White ? CastlingRights.WhiteQueenside : CastlingRights.BlackQueenside;
+        if (board.CastlingRights.HasFlag(queenside)
+            && board[rank, 0] == rook
+            && board[rank, 1] is null && board[rank, 2] is null && board[rank, 3] is null
+            && !IsSquareAttacked(board, new Square(rank, 3), them)
+            && !IsSquareAttacked(board, new Square(rank, 2), them))
+        {
+            moves.Add(new Move(kingSquare, new Square(rank, 2)));
+        }
     }
 
     public static List<Move> GetLegalMoves(Board board)
@@ -260,8 +312,10 @@ public static class MoveGenerator
                 }
             }
 
-            
         }
+
+        AddCastlingMoves(board, legalMoves, us);
+
         return legalMoves;
 
     }

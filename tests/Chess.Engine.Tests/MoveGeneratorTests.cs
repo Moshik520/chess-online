@@ -152,6 +152,38 @@ public class MoveGeneratorTests
     }
 
     [Theory]
+    [InlineData("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", true, true)]
+    [InlineData("r3k2r/8/8/8/8/8/8/R3K2R w - - 0 1", false, false)]      // no rights left
+    [InlineData("r3k2r/8/8/8/8/8/8/RN2K2R w KQkq - 0 1", true, false)]   // knight in the way on b1
+    [InlineData("4k3/4r3/8/8/8/8/8/R3K2R w KQ - 0 1", false, false)]     // cannot castle out of check
+    [InlineData("5rk1/8/8/8/8/8/8/R3K2R w KQ - 0 1", false, true)]       // f1 attacked: king would pass through
+    [InlineData("6rk/8/8/8/8/8/8/R3K2R w KQ - 0 1", false, true)]        // g1 attacked: king would land in check
+    [InlineData("1r2k3/8/8/8/8/8/8/R3K2R w KQ - 0 1", true, true)]       // b1 attacked is fine: only the rook passes
+    [InlineData("4k3/8/8/8/8/8/4p3/R3K2R w KQ - 0 1", false, false)]     // pawn on e2 attacks d1 and f1
+    public void GetLegalMoves_Castling_RespectsAllConditions(string fen, bool kingside, bool queenside)
+    {
+        var board = Board.FromFen(fen);
+        var e1 = new Square(0, 4);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.Equal(kingside, moves.Contains(new Move(e1, new Square(0, 6))));
+        Assert.Equal(queenside, moves.Contains(new Move(e1, new Square(0, 2))));
+    }
+
+    [Fact]
+    public void GetLegalMoves_BlackCastling_UsesEighthRank()
+    {
+        var board = Board.FromFen("r3k2r/8/8/8/8/8/8/4K3 b kq - 0 1");
+        var e8 = new Square(7, 4);
+
+        var moves = MoveGenerator.GetLegalMoves(board);
+
+        Assert.Contains(new Move(e8, new Square(7, 6)), moves);
+        Assert.Contains(new Move(e8, new Square(7, 2)), moves);
+    }
+
+    [Theory]
     [InlineData(Board.StartingFen, GameStatus.InProgress)]
     [InlineData("4r3/8/8/8/8/8/3P4/4K3 w - - 0 1", GameStatus.InProgress)] // in check, but the king can escape
     [InlineData("R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1", GameStatus.Checkmate)]
