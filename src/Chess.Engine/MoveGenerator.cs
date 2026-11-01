@@ -320,6 +320,32 @@ public static class MoveGenerator
 
     }
 
+    // Counts the positions reachable in exactly `depth` moves. Comparing the counts with
+    // published values validates the whole move generator, including the rare rules.
+    public static long Perft(Board board, int depth)
+    {
+        if (depth == 0)
+        {
+            return 1;
+        }
+
+        var moves = GetLegalMoves(board);
+        if (depth == 1)
+        {
+            return moves.Count;
+        }
+
+        long count = 0;
+        foreach (var move in moves)
+        {
+            Board next = board.Clone();
+            next.MakeMove(move);
+            count += Perft(next, depth - 1);
+        }
+
+        return count;
+    }
+
     public static GameStatus GetGameStatus(Board board)
     {
 
