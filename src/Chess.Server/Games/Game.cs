@@ -20,46 +20,56 @@ public class Game
 
     public bool TryJoin(string playerId)
     {
-        if (IsStarted || playerId == WhitePlayerId)
-        {
-            return false;
-        }
 
-        BlackPlayerId = playerId;
-        return true;
+        lock (_lock)
+        {
+            if (IsStarted || playerId == WhitePlayerId)
+            {
+                return false;
+            }
+
+            BlackPlayerId = playerId;
+            return true;
+        }
     }
+
+   
 
     public MoveResult TryMakeMove(string playerId, Move move)
     {
-        if (!IsStarted)
+        lock (_lock)
         {
-            return MoveResult.GameNotStarted;
-        }
+            if (!IsStarted)
+            {
+                return MoveResult.GameNotStarted;
+            }
 
-        if (Status != GameStatus.InProgress)
-        {
-            return MoveResult.GameOver;
-        }
+            if (Status != GameStatus.InProgress)
+            {
+                return MoveResult.GameOver;
+            }
 
-        PieceColor? color = ColorOf(playerId);
-        if (color is null)
-        {
-            return MoveResult.NotAPlayer;
-        }
+            PieceColor? color = ColorOf(playerId);
+            if (color is null)
+            {
+                return MoveResult.NotAPlayer;
+            }
 
-        if (color != Board.SideToMove)
-        {
-            return MoveResult.NotYourTurn;
-        }
+            if (color != Board.SideToMove)
+            {
+                return MoveResult.NotYourTurn;
+            }
 
-        if (!MoveGenerator.GetLegalMoves(Board).Contains(move))
-        {
-            return MoveResult.IllegalMove;
-        }
+            if (!MoveGenerator.GetLegalMoves(Board).Contains(move))
+            {
+                return MoveResult.IllegalMove;
+            }
 
-        Board.MakeMove(move);
-        return MoveResult.Ok;
+            Board.MakeMove(move);
+            return MoveResult.Ok;
+        }
     }
+    
 
     private PieceColor? ColorOf(string playerId)
     {
@@ -75,4 +85,6 @@ public class Game
 
         return null;
     }
+
+    private readonly Lock _lock = new();
 }
