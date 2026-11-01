@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Chess.Engine/Chess.Engine.csproj" />
+    <Project Path="src/Chess.Server/Chess.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Chess.Engine.Tests/Chess.Engine.Tests.csproj" />
+    <Project Path="tests/Chess.Server.Tests/Chess.Server.Tests.csproj" />
   </Folder>
 </Solution>
