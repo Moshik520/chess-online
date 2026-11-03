@@ -17,5 +17,22 @@ public class SquareTests
 
         Assert.Equal(expected, square.IsOnBoard);
     }
-    
+
+    [Theory]
+    [InlineData(0, 0, "a1")]
+    [InlineData(2, 4, "e3")]
+    [InlineData(7, 7, "h8")]
+    public void ToString_ReturnsAlgebraicName(int rank, int file, string expected)
+    {
+        Assert.Equal(expected, new Square(rank, file).ToString());
+    }
+
+    [Theory]
+    [InlineData("a1", 0, 0)]
+    [InlineData("e3", 2, 4)]
+    [InlineData("h8", 7, 7)]
+    public void Parse_ReadsAlgebraicName(string text, int rank, int file)
+    {
+        Assert.Equal(new Square(rank, file), Square.Parse(text));
+    }
 }

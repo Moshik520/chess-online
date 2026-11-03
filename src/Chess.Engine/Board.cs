@@ -85,18 +85,13 @@ public class Board
         }
         board.CastlingRights = rights;
 
-        board.EnPassantSquare = parts[3] != "-" ? ParseSquare(parts[3]) : null;
+        board.EnPassantSquare = parts[3] != "-" ? Square.Parse(parts[3]) : null;
 
 
         return board;
     }
 
-    private static Square ParseSquare(string text)
-    {
-        int file = text[0] - 'a';
-        int rank = text[1] - '1';
-        return new Square(rank, file);
-    }
+ 
 
     public Piece? this[Square square]
     {
