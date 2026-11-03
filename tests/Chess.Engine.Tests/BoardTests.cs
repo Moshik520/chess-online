@@ -64,6 +64,30 @@ public class BoardTests
         Assert.Equal(expected, board.CastlingRights);
     }
 
+    [Theory]
+    [InlineData(Board.StartingFen)]
+    [InlineData("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1")]
+    [InlineData("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")]
+    [InlineData("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1")]
+    [InlineData("r3k2r/8/8/8/8/8/8/R3K2R b Kq - 0 1")]
+    public void ToFen_RoundTripsFromFen(string fen)
+    {
+        Assert.Equal(fen, Board.FromFen(fen).ToFen());
+    }
+
+    [Fact]
+    public void ToFen_AfterMoves_DescribesNewPosition()
+    {
+        var board = Board.FromFen(Board.StartingFen);
+
+        board.MakeMove(Move.FromUci("e2e4"));
+        board.MakeMove(Move.FromUci("e7e5"));
+        board.MakeMove(Move.FromUci("e1e2"));
+
+        // The king move cleared white's castling rights and the en passant square from e7-e5.
+        Assert.Equal("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPPKPPP/RNBQ1BNR b kq - 0 1", board.ToFen());
+    }
+
     [Fact]
     public void FromFen_ReadsEnPassantSquare()
     {

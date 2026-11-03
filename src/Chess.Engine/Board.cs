@@ -1,5 +1,4 @@
-﻿
-using System.Drawing;
+﻿using System.Text;
 
 namespace Chess.Engine;
 
@@ -23,7 +22,80 @@ public class Board
             _ => throw new ArgumentException($"Unknown FEN piece '{c}'")
         };
 
-        return new Piece(type, color); 
+        return new Piece(type, color);
+    }
+
+    private static char PieceToChar(Piece piece)
+    {
+        char c = piece.Type switch
+        {
+            PieceType.Knight => 'n',
+            PieceType.Bishop => 'b',
+            PieceType.Rook => 'r',
+            PieceType.Queen => 'q',
+            PieceType.King => 'k',
+            PieceType.Pawn => 'p',
+            _ => throw new ArgumentOutOfRangeException(nameof(piece), $"Unknown piece type {piece.Type}")
+        };
+
+        return piece.Color == PieceColor.White ? char.ToUpper(c) : c;
+    }
+
+    // The move counters are not tracked yet, so they are always written as "0 1".
+    public string ToFen()
+    {
+        var fen = new StringBuilder();
+
+        for (int rank = 7; rank >= 0; rank--)
+        {
+            int empty = 0;
+            for (int file = 0; file < 8; file++)
+            {
+                Piece? piece = _squares[rank, file];
+                if (piece is null)
+                {
+                    empty++;
+                    continue;
+                }
+
+                if (empty > 0)
+                {
+                    fen.Append(empty);
+                    empty = 0;
+                }
+
+                fen.Append(PieceToChar(piece.Value));
+            }
+
+            if (empty > 0)
+            {
+                fen.Append(empty);
+            }
+
+            if (rank > 0)
+            {
+                fen.Append('/');
+            }
+        }
+
+        fen.Append(SideToMove == PieceColor.White ? " w " : " b ");
+        fen.Append(CastlingToFen());
+        fen.Append(' ');
+        fen.Append(EnPassantSquare?.ToString() ?? "-");
+        fen.Append(" 0 1");
+
+        return fen.ToString();
+    }
+
+    private string CastlingToFen()
+    {
+        var castling = new StringBuilder();
+        if (CastlingRights.HasFlag(CastlingRights.WhiteKingside)) castling.Append('K');
+        if (CastlingRights.HasFlag(CastlingRights.WhiteQueenside)) castling.Append('Q');
+        if (CastlingRights.HasFlag(CastlingRights.BlackKingside)) castling.Append('k');
+        if (CastlingRights.HasFlag(CastlingRights.BlackQueenside)) castling.Append('q');
+
+        return castling.Length > 0 ? castling.ToString() : "-";
     }
 
     public const string StartingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
