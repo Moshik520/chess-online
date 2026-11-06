@@ -14,7 +14,11 @@
           placeholder="Game code"
           aria-label="Game code"
         />
-        <button type="button" [disabled]="!joinCode().trim()" (click)="game.joinGame(joinCode().trim())">
+        <button
+          type="button"
+          [disabled]="!joinCode().trim()"
+          (click)="game.joinGame(joinCode().trim())"
+        >
           Join
         </button>
       </div>
@@ -26,13 +30,19 @@
       <p class="hint">Waiting for an opponent to join...</p>
     </section>
   } @else {
-    <app-board [fen]="game.fen()!" />
+    <app-board [fen]="game.fen()!" (moveSelected)="game.makeMove($event)" />
 
-    <p class="status">
+    <p class="status" [class.my-turn]="game.status() === 'playing' && game.isMyTurn()">
       @switch (game.status()) {
-        @case ('playing') { Game in progress }
-        @case ('Checkmate') { Checkmate }
-        @case ('Stalemate') { Stalemate, it's a draw }
+        @case ('playing') {
+          {{ game.isMyTurn() ? 'Your turn' : "Opponent's turn" }}
+        }
+        @case ('Checkmate') {
+          Checkmate
+        }
+        @case ('Stalemate') {
+          Stalemate, it's a draw
+        }
       }
     </p>
   }

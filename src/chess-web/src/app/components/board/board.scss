@@ -15,8 +15,18 @@
   line-height: 1;
   user-select: none;
 
+  cursor: pointer;
+
   &.dark {
     background: #b58863;
+  }
+
+  &.selected {
+    background: #f6f669;
+  }
+
+  &.dark.selected {
+    background: #baca2b;
   }
 }
 

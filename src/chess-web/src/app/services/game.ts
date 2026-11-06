@@ -1,21 +1,27 @@
-import { Service, signal } from '@angular/core';
+import { Service, signal, computed } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 export type GameState = 'idle' | 'waiting' | 'playing' | 'Checkmate' | 'Stalemate';
 
 @Service()
 export class GameService {
-
   readonly gameId = signal<string | null>(null);
   readonly fen = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly status = signal<GameState>('idle');
   readonly lastMove = signal<string | null>(null);
- 
-  private readonly connection = new signalR.HubConnectionBuilder()
-    .withUrl('/hubs/game')
-    .build();
+  readonly myColor = signal<'w' | 'b' | null>(null);
+
+  private readonly connection = new signalR.HubConnectionBuilder().withUrl('/hubs/game').build();
 
   private readonly connected = this.connection.start();
+
+  readonly isMyTurn = computed(() => {
+    const fen = this.fen();
+    if (fen === null) {
+      return false;
+    }
+    return fen.split(' ')[1] === this.myColor();
+  });
 
   constructor() {
     this.connection.on('GameStarted', (fen: string) => {
@@ -23,7 +29,7 @@ export class GameService {
       this.status.set('playing');
     });
 
-     this.connection.on('MoveMade', (uci: string, fen: string) => {
+    this.connection.on('MoveMade', (uci: string, fen: string) => {
       this.fen.set(fen);
       this.lastMove.set(uci);
     });
@@ -34,19 +40,23 @@ export class GameService {
   }
 
   async createGame() {
+    this.error.set(null);
     try {
       await this.connected;
       const id = await this.connection.invoke<string>('CreateGame');
+      this.myColor.set('w');
       this.gameId.set(id);
       this.status.set('waiting');
     } catch (e) {
       this.error.set(String(e));
     }
   }
-   async joinGame(id: string) {
+  async joinGame(id: string) {
+    this.error.set(null);
     try {
       await this.connected;
-      await this.connection.invoke<string>('JoinGame',id);
+      await this.connection.invoke<string>('JoinGame', id);
+      this.myColor.set('b');
       this.gameId.set(id);
       this.status.set('playing');
     } catch (e) {
@@ -54,14 +64,13 @@ export class GameService {
     }
   }
 
-    async makeMove(uci: string) {
+  async makeMove(uci: string) {
+    this.error.set(null);
     try {
       await this.connected;
-      await this.connection.invoke<string>('MakeMove',this.gameId(),uci);
+      await this.connection.invoke<string>('MakeMove', this.gameId(), uci);
     } catch (e) {
       this.error.set(String(e));
     }
   }
-
-  
 }

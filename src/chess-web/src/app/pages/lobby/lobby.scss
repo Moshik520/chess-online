@@ -101,9 +101,16 @@ button {
 
 .status {
   margin: 0;
+  padding: 0.4rem 1rem;
   font-size: 1.1rem;
   font-weight: 600;
   color: #4a3728;
+  border-radius: 999px;
+
+  &.my-turn {
+    color: #fff;
+    background: #4c8a3f;
+  }
 }
 
 .error {
