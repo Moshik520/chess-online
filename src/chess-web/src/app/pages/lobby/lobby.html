@@ -1,0 +1,24 @@
+<h1>Chess Online</h1>
+
+<p>Status: {{ game.status() }}</p>
+@if (game.status() === 'idle') {
+  <button type="button" (click)="game.createGame()">New game</button>
+  <input
+    [value]="joinCode()"
+    (input)="joinCode.set($any($event.target).value)"
+    placeholder="Game code"
+  />
+  <button type="button" (click)="game.joinGame(joinCode())">Join</button>
+} @else if (game.status() === 'waiting') {
+  <p>Share this code with your friend: {{ game.gameId() }}</p>
+} @else if (game.status() === 'playing') {
+  <p>fen: {{ game.fen() }}</p>
+} @else if (game.status() === 'Checkmate') {
+  <p>Checkmate</p>
+} @else if (game.status() === 'Stalemate') {
+  <p>Stalemate</p>
+}
+
+@if (game.error()) {
+  <p>Error: {{ game.error() }}</p>
+}
