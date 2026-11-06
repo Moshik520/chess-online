@@ -1,8 +1,9 @@
 import { Component,inject,signal } from '@angular/core';
 import { GameService } from '../../services/game';
+import { Board } from '../../components/board/board';
 
 @Component({
-  imports: [],
+  imports: [Board],
   selector: 'app-lobby',
   styleUrl: './lobby.scss',
   templateUrl: './lobby.html',

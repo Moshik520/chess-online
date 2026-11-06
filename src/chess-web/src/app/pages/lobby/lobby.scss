@@ -1,0 +1,115 @@
+.lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #4a3728;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: min(100%, 360px);
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.08);
+
+  p {
+    margin: 0;
+  }
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  font: inherit;
+  font-weight: 600;
+  color: #4a3728;
+  background: #f0d9b5;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #e6c99a;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.primary {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    color: #fff;
+    background: #b58863;
+
+    &:hover {
+      background: #9c7253;
+    }
+  }
+}
+
+.divider {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.join {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.8rem;
+    font: inherit;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    &:focus {
+      outline: 2px solid #b58863;
+      border-color: transparent;
+    }
+  }
+}
+
+.game-code {
+  padding: 0.5rem 1rem;
+  font-size: 1.6rem;
+  letter-spacing: 0.15em;
+  background: #f5efe6;
+  border-radius: 8px;
+  user-select: all;
+}
+
+.hint {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.status {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4a3728;
+}
+
+.error {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  color: #a12a2a;
+  background: #fdecec;
+  border-radius: 8px;
+}

@@ -1,0 +1,32 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(90vw, 480px);
+  aspect-ratio: 1;
+  border: 2px solid #4a3728;
+}
+
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0d9b5;
+  font-size: min(9vw, 48px);
+  line-height: 1;
+  user-select: none;
+
+  &.dark {
+    background: #b58863;
+  }
+}
+
+.piece {
+  color: #1a1a1a;
+
+  &.white {
+    color: #fff;
+    text-shadow:
+      0 0 1px #000,
+      0 0 2px #000;
+  }
+}

@@ -1,24 +1,43 @@
-<h1>Chess Online</h1>
+<main class="lobby">
+  <h1>Chess Online</h1>
 
-<p>Status: {{ game.status() }}</p>
-@if (game.status() === 'idle') {
-  <button type="button" (click)="game.createGame()">New game</button>
-  <input
-    [value]="joinCode()"
-    (input)="joinCode.set($any($event.target).value)"
-    placeholder="Game code"
-  />
-  <button type="button" (click)="game.joinGame(joinCode())">Join</button>
-} @else if (game.status() === 'waiting') {
-  <p>Share this code with your friend: {{ game.gameId() }}</p>
-} @else if (game.status() === 'playing') {
-  <p>fen: {{ game.fen() }}</p>
-} @else if (game.status() === 'Checkmate') {
-  <p>Checkmate</p>
-} @else if (game.status() === 'Stalemate') {
-  <p>Stalemate</p>
-}
+  @if (game.status() === 'idle') {
+    <section class="panel">
+      <button type="button" class="primary" (click)="game.createGame()">New game</button>
 
-@if (game.error()) {
-  <p>Error: {{ game.error() }}</p>
-}
+      <p class="divider">or join a friend's game</p>
+
+      <div class="join">
+        <input
+          [value]="joinCode()"
+          (input)="joinCode.set($any($event.target).value)"
+          placeholder="Game code"
+          aria-label="Game code"
+        />
+        <button type="button" [disabled]="!joinCode().trim()" (click)="game.joinGame(joinCode().trim())">
+          Join
+        </button>
+      </div>
+    </section>
+  } @else if (game.status() === 'waiting') {
+    <section class="panel">
+      <p>Share this code with your friend:</p>
+      <code class="game-code">{{ game.gameId() }}</code>
+      <p class="hint">Waiting for an opponent to join...</p>
+    </section>
+  } @else {
+    <app-board [fen]="game.fen()!" />
+
+    <p class="status">
+      @switch (game.status()) {
+        @case ('playing') { Game in progress }
+        @case ('Checkmate') { Checkmate }
+        @case ('Stalemate') { Stalemate, it's a draw }
+      }
+    </p>
+  }
+
+  @if (game.error()) {
+    <p class="error" role="alert">{{ game.error() }}</p>
+  }
+</main>

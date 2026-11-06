@@ -1,0 +1,9 @@
+<div class="board">
+  @for (square of squares(); track square.name) {
+    <div class="square" [class.dark]="square.dark">
+      @if (square.symbol) {
+        <span class="piece" [class.white]="square.white">{{ square.symbol }}</span>
+      }
+    </div>
+  }
+</div>
