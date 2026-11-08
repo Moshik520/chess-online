@@ -34,6 +34,13 @@ const SYMBOLS: Record<string, string> = {
 export class Board {
   readonly fen = input.required<string>();
   readonly flipped = input<boolean>(false);
+  readonly lastMove = input<string | null>(null);
+
+  // "e2e4" -> ["e2", "e4"]
+  protected readonly lastMoveSquares = computed(() => {
+    const move = this.lastMove();
+    return move ? [move.slice(0, 2), move.slice(2, 4)] : [];
+  });
 
   protected readonly selected = signal<string | null>(null);
   protected readonly pendingPromotion = signal<PendingPromotion | null>(null);

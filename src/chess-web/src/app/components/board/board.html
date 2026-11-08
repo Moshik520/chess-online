@@ -3,6 +3,7 @@
     <div
       class="square"
       [class.dark]="square.dark"
+      [class.last-move]="lastMoveSquares().includes(square.name)"
       [class.selected]="square.name === selected()"
       (click)="onSquareClick(square)"
     >

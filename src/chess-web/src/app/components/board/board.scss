@@ -22,6 +22,15 @@
     background: #b58863;
   }
 
+  &.last-move {
+    background: #cdd26a;
+  }
+
+  &.dark.last-move {
+    background: #aaa23a;
+  }
+
+  // Declared after last-move so a selected square wins when both apply.
   &.selected {
     background: #f6f669;
   }

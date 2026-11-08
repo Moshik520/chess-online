@@ -33,6 +33,7 @@
     <app-board
       [fen]="game.fen()!"
       (moveSelected)="game.makeMove($event)"
+      [lastMove]="game.lastMove()"
       [flipped]="game.myColor() === 'b'"
     />
 
