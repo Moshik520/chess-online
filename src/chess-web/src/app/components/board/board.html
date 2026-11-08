@@ -1,11 +1,29 @@
-
 <div class="board">
   @for (square of squares(); track square.name) {
-    <div class="square" [class.dark]="square.dark" (click)="onSquareClick(square)" [class.selected]="square.name === selected()"
->
+    <div
+      class="square"
+      [class.dark]="square.dark"
+      [class.selected]="square.name === selected()"
+      (click)="onSquareClick(square)"
+    >
       @if (square.symbol) {
         <span class="piece" [class.white]="square.white">{{ square.symbol }}</span>
       }
+    </div>
+  }
+
+  @if (pendingPromotion(); as pending) {
+    <div class="promotion-backdrop" (click)="cancelPromotion()">
+      <div class="promotion" role="dialog" aria-label="Choose promotion piece" (click)="$event.stopPropagation()">
+        <p>Promote to</p>
+        <div class="choices">
+          @for (choice of promotionChoices; track choice.letter) {
+            <button type="button" (click)="choosePromotion(choice.letter)" [attr.aria-label]="choice.letter">
+              <span class="piece" [class.white]="pending.white">{{ choice.symbol }}</span>
+            </button>
+          }
+        </div>
+      </div>
     </div>
   }
 </div>

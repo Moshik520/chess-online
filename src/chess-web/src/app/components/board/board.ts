@@ -1,5 +1,11 @@
 import { Component, computed, input, signal, output } from '@angular/core';
 
+interface PendingPromotion {
+  from: string;
+  to: string;
+  white: boolean;
+}
+
 interface SquareView {
   name: string;
   piece: string | null;
@@ -30,6 +36,11 @@ export class Board {
   readonly flipped = input<boolean>(false);
 
   protected readonly selected = signal<string | null>(null);
+  protected readonly pendingPromotion = signal<PendingPromotion | null>(null);
+  protected readonly promotionChoices = ['q', 'r', 'b', 'n'].map((letter) => ({
+    letter,
+    symbol: SYMBOLS[letter],
+  }));
   readonly moveSelected = output<string>();
 
   protected readonly squares = computed(() => {
@@ -78,8 +89,33 @@ export class Board {
     if (from === square.name) {
       this.selected.set(null);
     } else {
-      this.moveSelected.emit(from + square.name);
+      const fromSquare = this.squares().find((s) => s.name === from);
+      const isPromotion =
+        fromSquare?.piece?.toLowerCase() === 'p' &&
+        (square.name[1] === '8' || square.name[1] === '1');
       this.selected.set(null);
+
+      if (isPromotion) {
+        // Hold the move until the player picks a piece.
+        this.pendingPromotion.set({ from, to: square.name, white: fromSquare!.white });
+        return;
+      }
+
+      this.moveSelected.emit(from + square.name);
     }
+  }
+
+  protected choosePromotion(letter: string) {
+    const pending = this.pendingPromotion();
+    if (pending === null) {
+      return;
+    }
+
+    this.moveSelected.emit(pending.from + pending.to + letter);
+    this.pendingPromotion.set(null);
+  }
+
+  protected cancelPromotion() {
+    this.pendingPromotion.set(null);
   }
 }
