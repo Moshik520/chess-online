@@ -145,6 +145,37 @@ public class GameHubTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("Game not found", error.Message);
     }
 
+    [Fact]
+    public async Task Disconnect_OpponentIsToldAndGameIsClosed()
+    {
+        var (white, black, gameId) = await StartGameAsync();
+        await using var _ = white;
+
+        await black.DisposeAsync();
+
+        await white.PlayerDisconnected.Task.WaitAsync(Timeout);
+        var error = await Assert.ThrowsAsync<HubException>(
+            () => white.Connection.InvokeAsync("MakeMove", gameId, "e2e4"));
+        Assert.Contains("Game not found", error.Message);
+    }
+
+    [Fact]
+    public async Task Checkmate_ClosesTheGame()
+    {
+        var (white, black, gameId) = await StartGameAsync();
+        await using var _ = white;
+        await using var __ = black;
+
+        await white.Connection.InvokeAsync("MakeMove", gameId, "f2f3");
+        await black.Connection.InvokeAsync("MakeMove", gameId, "e7e5");
+        await white.Connection.InvokeAsync("MakeMove", gameId, "g2g4");
+        await black.Connection.InvokeAsync("MakeMove", gameId, "d8h4");
+
+        var error = await Assert.ThrowsAsync<HubException>(
+            () => white.Connection.InvokeAsync("MakeMove", gameId, "a2a3"));
+        Assert.Contains("Game not found", error.Message);
+    }
+
     private async Task<(TestPlayer White, TestPlayer Black, string GameId)> StartGameAsync()
     {
         var white = await ConnectAsync();
@@ -181,6 +212,7 @@ public class GameHubTests : IClassFixture<WebApplicationFactory<Program>>
             connection.On<string>("GameStarted", fen => GameStarted.TrySetResult(fen));
             connection.On<string, string>("MoveMade", (uci, fen) => MovesMade.Writer.TryWrite((uci, fen)));
             connection.On<string>("GameOver", status => GameOver.TrySetResult(status));
+            connection.On("PlayerDisconnected", () => PlayerDisconnected.TrySetResult());
         }
 
         public HubConnection Connection { get; }
@@ -190,6 +222,8 @@ public class GameHubTests : IClassFixture<WebApplicationFactory<Program>>
         public Channel<(string Uci, string Fen)> MovesMade { get; } = Channel.CreateUnbounded<(string, string)>();
 
         public TaskCompletionSource<string> GameOver { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public TaskCompletionSource PlayerDisconnected { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public ValueTask DisposeAsync() => Connection.DisposeAsync();
     }

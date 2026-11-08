@@ -115,9 +115,7 @@ public static class MoveGenerator
         }
 
         throw new InvalidOperationException($"No king found for color {color}");
-
     }
-
 
     private static PieceColor ColorAt(Board board, Square from) =>
         board[from]?.Color ?? throw new ArgumentException($"No piece on {from}", nameof(from));
@@ -308,16 +306,13 @@ public static class MoveGenerator
                     {
                         legalMoves.Add(move);
                     }
-
                 }
             }
-
         }
 
         AddCastlingMoves(board, legalMoves, us);
 
         return legalMoves;
-
     }
 
     // Counts the positions reachable in exactly `depth` moves. Comparing the counts with
@@ -348,19 +343,14 @@ public static class MoveGenerator
 
     public static GameStatus GetGameStatus(Board board)
     {
-
         if (GetLegalMoves(board).Count != 0)
         {
             return GameStatus.InProgress;
-         
         }
         if (IsInCheck(board, board.SideToMove))
         {
             return GameStatus.Checkmate;
         }
         return GameStatus.Stalemate;
-
-
     }
-
 }

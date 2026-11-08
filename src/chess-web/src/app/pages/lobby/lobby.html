@@ -50,8 +50,15 @@
         @case ('Stalemate') {
           Stalemate, it's a draw
         }
+        @case ('abandoned') {
+          Your opponent left the game
+        }
       }
     </p>
+
+    @if (game.status() !== 'playing') {
+      <button type="button" (click)="game.leaveGame()">Back to lobby</button>
+    }
   }
 
   @if (game.error()) {

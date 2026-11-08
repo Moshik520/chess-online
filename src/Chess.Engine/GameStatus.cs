@@ -4,5 +4,3 @@ public enum GameStatus
 {
     InProgress, Checkmate, Stalemate
 }
-
-

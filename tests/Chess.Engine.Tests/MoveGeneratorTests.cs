@@ -19,7 +19,6 @@ public class MoveGeneratorTests
     [Fact]
     public void GetRookMoves_BlockedAndCapture_ReturnsTenMoves()
     {
-        
         var board = Board.FromFen("8/8/3P4/8/3R2p1/8/8/8 w - - 0 1");
         Square startingSquare = new Square(3, 3);
         var moves = MoveGenerator.GetRookMoves(board, startingSquare);
@@ -320,5 +319,4 @@ public class MoveGeneratorTests
         Assert.All(moves, move => Assert.Equal(new Square(7, 3), move.To));
         Assert.All(moves, move => Assert.NotNull(move.Promotion));
     }
-
 }

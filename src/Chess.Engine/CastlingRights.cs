@@ -10,7 +10,3 @@ public enum CastlingRights
     BlackQueenside = 8,
     All = WhiteKingside | WhiteQueenside | BlackKingside | BlackQueenside
 }
-
-
-
-

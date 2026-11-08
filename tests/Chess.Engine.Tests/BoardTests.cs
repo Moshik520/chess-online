@@ -9,12 +9,10 @@ public class BoardTests
     {
         // Arrange
         var board = new Board();
- 
 
         // Assert
         Assert.Null(board[0, 0]);
     }
-
 
     [Fact]
     public void SetPiece_ReturnsSamePiece()
@@ -23,10 +21,8 @@ public class BoardTests
         var board = new Board();
         var piece = new Piece(PieceType.Knight, PieceColor.White);
 
-
         // Act
         board[0, 0] = piece;
-
 
         // Assert
         Assert.Equal(piece, board[0, 0]);

@@ -8,7 +8,6 @@ public class Board
 
     private static Piece PieceFromChar(char c)
     {
-
         PieceColor color = char.IsLower(c) ? PieceColor.Black : PieceColor.White;
 
         PieceType type = char.ToLower(c) switch
@@ -110,17 +109,15 @@ public class Board
 
     public CastlingRights CastlingRights { get; private set; }
 
-
     public static Board FromFen(string fen)
     {
         Board board = new Board();
         string[] parts = fen.Split(' ');
 
         string first = parts[0];
-        
+
         int rank = 7;
         int file = 0;
-
 
         foreach (char c in first)
         {
@@ -159,11 +156,8 @@ public class Board
 
         board.EnPassantSquare = parts[3] != "-" ? Square.Parse(parts[3]) : null;
 
-
         return board;
     }
-
- 
 
     public Piece? this[Square square]
     {
@@ -172,7 +166,6 @@ public class Board
     }
 
     public Square? EnPassantSquare { get; private set; }
-
 
     public void MakeMove(Move move)
     {
@@ -223,8 +216,6 @@ public class Board
         SideToMove = SideToMove == PieceColor.White ? PieceColor.Black : PieceColor.White;
     }
 
-
-
     private static CastlingRights CornerRight(Square square) => (square.Rank, square.File) switch
     {
         (0, 0) => CastlingRights.WhiteQueenside,
@@ -236,7 +227,6 @@ public class Board
 
     public Board Clone()
     {
-
         Board copyBoard = new Board();
 
         for (int rank = 0; rank < 8; rank++)
@@ -244,8 +234,6 @@ public class Board
             for (int file = 0; file < 8; file++)
             {
                 copyBoard._squares[rank, file] = _squares[rank, file];
-
-
             }
         }
         copyBoard.SideToMove = SideToMove;
@@ -253,13 +241,5 @@ public class Board
         copyBoard.CastlingRights = CastlingRights;
 
         return copyBoard;
-
     }
-
-
 }
-
-
-
-
-

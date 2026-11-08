@@ -20,7 +20,6 @@ public class Game
 
     public bool TryJoin(string playerId)
     {
-
         lock (_lock)
         {
             if (IsStarted || playerId == WhitePlayerId)
@@ -32,8 +31,6 @@ public class Game
             return true;
         }
     }
-
-   
 
     public MoveResult TryMakeMove(string playerId, Move move)
     {
@@ -77,8 +74,6 @@ public class Game
             return MoveGenerator.GetLegalMoves(Board);
         }
     }
-
-
 
     private PieceColor? ColorOf(string playerId)
     {

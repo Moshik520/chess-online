@@ -17,11 +17,20 @@
 
   @if (pendingPromotion(); as pending) {
     <div class="promotion-backdrop" (click)="cancelPromotion()">
-      <div class="promotion" role="dialog" aria-label="Choose promotion piece" (click)="$event.stopPropagation()">
+      <div
+        class="promotion"
+        role="dialog"
+        aria-label="Choose promotion piece"
+        (click)="$event.stopPropagation()"
+      >
         <p>Promote to</p>
         <div class="choices">
           @for (choice of promotionChoices; track choice.letter) {
-            <button type="button" (click)="choosePromotion(choice.letter)" [attr.aria-label]="choice.letter">
+            <button
+              type="button"
+              (click)="choosePromotion(choice.letter)"
+              [attr.aria-label]="choice.letter"
+            >
               <span class="piece" [class.white]="pending.white">{{ choice.symbol }}</span>
             </button>
           }

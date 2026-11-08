@@ -1,6 +1,6 @@
 import { Service, signal, computed } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-export type GameState = 'idle' | 'waiting' | 'playing' | 'Checkmate' | 'Stalemate';
+export type GameState = 'idle' | 'waiting' | 'playing' | 'Checkmate' | 'Stalemate' | 'abandoned';
 
 @Service()
 export class GameService {
@@ -21,7 +21,7 @@ export class GameService {
     if (fen === null) {
       return false;
     }
-    
+
     return fen.split(' ')[1] === this.myColor();
   });
 
@@ -40,6 +40,22 @@ export class GameService {
     this.connection.on('GameOver', (status: string) => {
       this.status.set(status as GameState);
     });
+
+    this.connection.on('PlayerDisconnected', () => {
+      this.status.set('abandoned');
+      this.legalMoves.set([]);
+    });
+  }
+
+  // Back to the lobby so the player can start or join another game.
+  leaveGame() {
+    this.gameId.set(null);
+    this.fen.set(null);
+    this.lastMove.set(null);
+    this.myColor.set(null);
+    this.legalMoves.set([]);
+    this.error.set(null);
+    this.status.set('idle');
   }
 
   async createGame() {
@@ -75,7 +91,6 @@ export class GameService {
     } catch (e) {
       this.error.set(String(e));
     }
-    
   }
 
   clearLegalMoves() {
@@ -86,7 +101,11 @@ export class GameService {
     this.error.set(null);
     try {
       await this.connected;
-      const legalMoves = await this.connection.invoke<string[]>('GetLegalMoves', this.gameId(), from);
+      const legalMoves = await this.connection.invoke<string[]>(
+        'GetLegalMoves',
+        this.gameId(),
+        from,
+      );
       this.legalMoves.set(legalMoves);
     } catch (e) {
       this.error.set(String(e));
