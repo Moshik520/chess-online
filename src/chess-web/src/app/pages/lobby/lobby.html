@@ -30,7 +30,11 @@
       <p class="hint">Waiting for an opponent to join...</p>
     </section>
   } @else {
-    <app-board [fen]="game.fen()!" (moveSelected)="game.makeMove($event)" />
+    <app-board
+      [fen]="game.fen()!"
+      (moveSelected)="game.makeMove($event)"
+      [flipped]="game.myColor() === 'b'"
+    />
 
     <p class="status" [class.my-turn]="game.status() === 'playing' && game.isMyTurn()">
       @switch (game.status()) {

@@ -27,6 +27,7 @@ const SYMBOLS: Record<string, string> = {
 })
 export class Board {
   readonly fen = input.required<string>();
+  readonly flipped = input<boolean>(false);
 
   protected readonly selected = signal<string | null>(null);
   readonly moveSelected = output<string>();
@@ -53,7 +54,7 @@ export class Board {
       }
     }
 
-    return result;
+    return this.flipped() ? result.reverse() : result;
   });
 
   private square(rank: number, file: number, piece: string | null): SquareView {
