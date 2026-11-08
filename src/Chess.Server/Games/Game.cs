@@ -69,7 +69,16 @@ public class Game
             return MoveResult.Ok;
         }
     }
-    
+
+    public List<Move> GetLegalMoves()
+    {
+        lock (_lock)
+        {
+            return MoveGenerator.GetLegalMoves(Board);
+        }
+    }
+
+
 
     private PieceColor? ColorOf(string playerId)
     {

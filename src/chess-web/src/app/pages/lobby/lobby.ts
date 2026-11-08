@@ -12,4 +12,12 @@ export class Lobby {
   protected readonly game = inject(GameService);
   protected readonly joinCode = signal('');
 
+  protected onPieceSelected(square: string | null) {
+    if (square === null) {
+      this.game.clearLegalMoves();
+      return;
+    }
+
+    this.game.getLegalMoves(square);
+  }
 }

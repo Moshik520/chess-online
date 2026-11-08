@@ -82,5 +82,31 @@ public class GameHub : Hub
 
     }
 
+    public List<string> GetLegalMoves(string gameId,string from)
+    {
+        Game? game = _games.FindGame(gameId);
+
+        if (game is null)
+        {
+            throw new HubException("Game not found");
+
+        }
+
+        Square fromSquare = Square.Parse(from);
+
+        List<Move> allLegalMoves = game.GetLegalMoves();
+        List<string> legalMovesForFrom = new List<string>();
+        foreach (Move move in allLegalMoves)
+        {
+            if(move.From == fromSquare)
+            {
+                legalMovesForFrom.Add(move.To.ToString());
+            }
+        }
+
+        return legalMovesForFrom.Distinct().ToList();
+
+    }
+
 
 }

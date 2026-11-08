@@ -35,6 +35,7 @@ export class Board {
   readonly fen = input.required<string>();
   readonly flipped = input<boolean>(false);
   readonly lastMove = input<string | null>(null);
+  readonly legalTargets = input<string[]>([]);
 
   // "e2e4" -> ["e2", "e4"]
   protected readonly lastMoveSquares = computed(() => {
@@ -49,6 +50,8 @@ export class Board {
     symbol: SYMBOLS[letter],
   }));
   readonly moveSelected = output<string>();
+  // The square of the piece the player picked up, or null when nothing is selected.
+  readonly pieceSelected = output<string | null>();
 
   protected readonly squares = computed(() => {
     const placement = this.fen().split(' ')[0];
@@ -89,18 +92,25 @@ export class Board {
     const from = this.selected();
     if (from === null) {
       if (square.piece) {
-        this.selected.set(square.name);
+        this.select(square.name);
       }
       return;
     }
     if (from === square.name) {
-      this.selected.set(null);
+      this.select(null);
     } else {
       const fromSquare = this.squares().find((s) => s.name === from);
+
+      // Clicking another piece of the same colour switches the selection instead of moving.
+      if (square.piece && square.white === fromSquare?.white) {
+        this.select(square.name);
+        return;
+      }
+
       const isPromotion =
         fromSquare?.piece?.toLowerCase() === 'p' &&
         (square.name[1] === '8' || square.name[1] === '1');
-      this.selected.set(null);
+      this.select(null);
 
       if (isPromotion) {
         // Hold the move until the player picks a piece.
@@ -110,6 +120,11 @@ export class Board {
 
       this.moveSelected.emit(from + square.name);
     }
+  }
+
+  private select(name: string | null) {
+    this.selected.set(name);
+    this.pieceSelected.emit(name);
   }
 
   protected choosePromotion(letter: string) {

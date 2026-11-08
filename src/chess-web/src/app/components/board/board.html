@@ -5,6 +5,8 @@
       [class.dark]="square.dark"
       [class.last-move]="lastMoveSquares().includes(square.name)"
       [class.selected]="square.name === selected()"
+      [class.legal-target]="legalTargets().includes(square.name)"
+      [class.occupied]="square.piece !== null"
       (click)="onSquareClick(square)"
     >
       @if (square.symbol) {

@@ -110,6 +110,41 @@ public class GameHubTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal("Checkmate", await black.GameOver.Task.WaitAsync(Timeout));
     }
 
+    [Fact]
+    public async Task GetLegalMoves_PawnOnStartSquare_ReturnsBothTargets()
+    {
+        var (white, black, gameId) = await StartGameAsync();
+        await using var _ = white;
+        await using var __ = black;
+
+        var targets = await white.Connection.InvokeAsync<List<string>>("GetLegalMoves", gameId, "e2");
+
+        Assert.Equal(["e3", "e4"], targets.Order());
+    }
+
+    [Fact]
+    public async Task GetLegalMoves_BlockedPiece_ReturnsEmptyList()
+    {
+        var (white, black, gameId) = await StartGameAsync();
+        await using var _ = white;
+        await using var __ = black;
+
+        var targets = await white.Connection.InvokeAsync<List<string>>("GetLegalMoves", gameId, "a1");
+
+        Assert.Empty(targets);
+    }
+
+    [Fact]
+    public async Task GetLegalMoves_UnknownGame_FailsWithMessage()
+    {
+        await using var player = await ConnectAsync();
+
+        var error = await Assert.ThrowsAsync<HubException>(
+            () => player.Connection.InvokeAsync<List<string>>("GetLegalMoves", "no-such-game", "e2"));
+
+        Assert.Contains("Game not found", error.Message);
+    }
+
     private async Task<(TestPlayer White, TestPlayer Black, string GameId)> StartGameAsync()
     {
         var white = await ConnectAsync();

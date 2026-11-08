@@ -10,6 +10,7 @@ export class GameService {
   readonly status = signal<GameState>('idle');
   readonly lastMove = signal<string | null>(null);
   readonly myColor = signal<'w' | 'b' | null>(null);
+  readonly legalMoves = signal<string[]>([]);
 
   private readonly connection = new signalR.HubConnectionBuilder().withUrl('/hubs/game').build();
 
@@ -20,6 +21,7 @@ export class GameService {
     if (fen === null) {
       return false;
     }
+    
     return fen.split(' ')[1] === this.myColor();
   });
 
@@ -32,6 +34,7 @@ export class GameService {
     this.connection.on('MoveMade', (uci: string, fen: string) => {
       this.fen.set(fen);
       this.lastMove.set(uci);
+      this.legalMoves.set([]);
     });
 
     this.connection.on('GameOver', (status: string) => {
@@ -69,6 +72,22 @@ export class GameService {
     try {
       await this.connected;
       await this.connection.invoke<string>('MakeMove', this.gameId(), uci);
+    } catch (e) {
+      this.error.set(String(e));
+    }
+    
+  }
+
+  clearLegalMoves() {
+    this.legalMoves.set([]);
+  }
+
+  async getLegalMoves(from: string) {
+    this.error.set(null);
+    try {
+      await this.connected;
+      const legalMoves = await this.connection.invoke<string[]>('GetLegalMoves', this.gameId(), from);
+      this.legalMoves.set(legalMoves);
     } catch (e) {
       this.error.set(String(e));
     }

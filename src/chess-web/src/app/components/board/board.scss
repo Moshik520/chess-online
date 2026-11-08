@@ -2,12 +2,17 @@
   position: relative;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
+  // Without explicit rows, a row with no pieces has no content and collapses.
+  grid-template-rows: repeat(8, 1fr);
   width: min(90vw, 480px);
   aspect-ratio: 1;
   border: 2px solid #4a3728;
 }
 
 .square {
+  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,6 +42,28 @@
 
   &.dark.selected {
     background: #baca2b;
+  }
+
+  // A dot on empty target squares, a ring around pieces that can be captured.
+  &.legal-target {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 30%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgb(0 0 0 / 0.2);
+      pointer-events: none;
+    }
+
+    &.occupied::after {
+      width: 88%;
+      background: transparent;
+      border: 5px solid rgb(0 0 0 / 0.2);
+      box-sizing: border-box;
+    }
   }
 }
 
